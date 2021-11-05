@@ -69,13 +69,6 @@ class BoxPlot(Widget):
         self._a = float((self.height-2.*(self._bp+self._op))/(self._bpd.max-self._bpd.min))
         self._b = float(-self._a*self._bpd.min)
 
-    def set_marker(self, value):
-        if value is None:
-            self._drawnmarkercolor = (0, 0, 0, 0)
-        else:
-            self._markervalue = value
-            self._drawnmarkercolor = self._markercolor
-
     @property
     def outlier_proportion_large(self):
         return min(10, len([x for x in self._bpd.outliers if x>self._bpd.max]))/10.
