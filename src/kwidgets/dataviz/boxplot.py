@@ -1,3 +1,6 @@
+""" A boxplot object for Kivy
+"""
+
 from typing import Union, Iterable, Tuple
 import numpy as np
 from kivy.app import App
@@ -53,6 +56,9 @@ Builder.load_string("""
 
 
 class BoxPlot(Widget):
+    """ A Kivy boxplot object.
+
+    """
     _bpd = ObjectProperty(BoxPlotData(list(np.arange(0, 1.0, 0.1))))
     _a = NumericProperty(0)
     _b = NumericProperty(1)
@@ -68,71 +74,126 @@ class BoxPlot(Widget):
     _markerwidth = NumericProperty(2)
 
     def _computeAB(self):
+        """ Computer values needed to scale data values to pixels.
+
+        Given the range of the plot and the height of the object in pixels,
+        computer the parameters for linear computation (ax+b) to convert a
+        data value into a pixel location for plotting.
+        """
         self._a = float((self.height-2.*(self._bp+self._op))/(self._axis_range[1]-self._axis_range[0]))
         self._b = float(-self._a*self._axis_range[0])
 
     @property
     def outlier_proportion_large(self):
+        """ For computing the width of the top outlier line
+
+        :return: min(10, num large outliers)/10
+        """
         return min(10, len([x for x in self._bpd.outliers if x>self._bpd.max]))/10.
 
     @property
     def outlier_proportion_small(self):
+        """ For computing the width of the small outlier line
+
+        :return: min(10, num small outliers)/10
+        """
         return min(10, len([x for x in self._bpd.outliers if x<self._bpd.min]))/10.
 
     @property
     def boxpadding(self):
+        """ The number of pixles to use as a border around the box.
+
+        :return: number of pixels
+        """
         return self._bp
 
     @boxpadding.setter
     def boxpadding(self, value):
+        """ The number of pixles to use as a border around the box.
+
+        :param value: number of pixels
+        """
         self._bp = value
 
     @property
     def outlierpadding(self):
+        """ Number of pixels between the top of the box plot and the line for outliers.
+
+        :return: number of pixels
+        """
         return self._op
 
     @outlierpadding.setter
     def outlierpadding(self, value):
+        """ Number of pixels between the top of the box plot and the line for outliers.
+
+        :param value: number of pixels
+        """
         self._op = value
 
     @property
     def boxcolor(self):
+        """ The color of the box
+
+        :return: tuple in the form of red, green, blue, alpha
+        """
         return self._boxcolor
 
     @boxcolor.setter
     def boxcolor(self, value):
+        """ The color of the box
+
+        :param value: tuple in the form of red, green, blue, alpha
+        """
         self._boxcolor = value
 
     @property
     def markercolor(self):
+        """ The color of the marker for the extra plotted value.
+
+        :return: tuple in the form of red, green, blue, alpha
+        """
         return self._markercolor
 
     @markercolor.setter
     def markercolor(self, value):
-        self._markercolor = value
+        """ The color of the marker for the extra plotted value
 
-    @property
-    def markercolor(self):
-        return self._markercolor
-
-    @markercolor.setter
-    def markercolor(self, value):
+        :param value: tuple in the form of red, green, blue, alpha
+        """
         self._markercolor = value
 
     @property
     def markervalue(self):
+        """ The extra value to plot
+
+        :return: value in the range of the data
+        """
         return self._markervalue
 
     @markervalue.setter
     def markervalue(self, value):
+        """ The extra value to plot
+
+        :param value: value in the range of the data
+        """
         self._markervalue = value
 
     @property
     def data(self):
+        """ The math.BoxPlotData object being plotted.
+
+        :return:
+        """
         return self._bpd
 
     @data.setter
     def data(self, data: Union[BoxPlotData, Iterable[Union[float, int]]]):
+        """ Sets the data being plotted.
+
+        :param data: If an instances of BoxPlotData, just use that object.  Otherwise, create a new BoxPlotData object
+        from the list of numbers provided.
+        """
         if isinstance(data, BoxPlotData):
             bpd = data
         else:
@@ -144,10 +205,24 @@ class BoxPlot(Widget):
 
     @property
     def axis_range(self):
+        """ The range of the plot.
+
+        In the even that multiple boxplot are displayed next to each other (or for some other reason), it might be
+        useful to manually specify the range of the databeing ploted.  If no axis range is manually specified, this
+        will simply be the BoxPlotData's min,max values.  If manually specified, it will be the manually specified values.
+
+        :return: a tuple in the form of (min, max)
+        """
         return self._axis_range
 
     @axis_range.setter
     def axis_range(self, minmax: Tuple[float, float]):
+        """ Manually set the range for the box plot.
+
+        This method will both set the range and prevent the range from changing if the boxplot data is set later.
+
+        :param minmax: tuple in the form of  (min, max)
+        """
         self._axis_range = minmax
         self._auto_axis = False
         self._computeAB()
