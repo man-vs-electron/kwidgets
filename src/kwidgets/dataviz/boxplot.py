@@ -1,8 +1,8 @@
-from typing import Union, Iterable
+from typing import Union, Iterable, Tuple
 import numpy as np
 from kivy.app import App
 from kivy.uix.widget import Widget
-from kivy.properties import NumericProperty, ListProperty, ObjectProperty
+from kivy.properties import NumericProperty, ListProperty, ObjectProperty, BooleanProperty
 from kivy.lang.builder import Builder
 from kwidgets.dataviz.math import BoxPlotData
 
@@ -10,6 +10,13 @@ Builder.load_string("""
 <BoxPlot>:
     on_height: self._computeAB()
     canvas:
+        # draw a couple invisible lines to make the _axis_range property bound to the redraw
+        Color:
+            rgba: 0, 0, 0, 0
+        Line:
+            points: self.width-1, self.y+self._bp+self._op+(self._a*self._axis_range[0]+self._b), self.width+1, self.y+self._bp+self._op+(self._a*self._axis_range[0]+self._b)
+        Line:
+            points: self.width-1, self.y+self._bp+self._op+(self._a*self._axis_range[1]+self._b), self.width+1, self.y+self._bp+self._op+(self._a*self._axis_range[1]+self._b)
         Color:
             rgba: self._boxcolor
         Line:
@@ -35,7 +42,7 @@ Builder.load_string("""
             points: self.x+self._bp+(0.5*(1.0-self.outlier_proportion_large)*(self.width-2*self._bp)), self.y+self._bp+2.*self._op+(self._a*self._bpd.max+self._b), self.x+self.width-self._bp-(0.5*(1.0-self.outlier_proportion_large)*(self.width-2*self._bp)), self.y+self._bp+2.*self._op+(self._a*self._bpd.max+self._b)
         Line:
             # plot small outliers as extra line
-            points: self.x+self._bp+(0.5*(1.0-self.outlier_proportion_small)*(self.width-2*self._bp)), self.y+self._bp, self.x+self.width-self._bp-(0.5*(1.0-self.outlier_proportion_small)*(self.width-2*self._bp)), self.y+self._bp
+            points: self.x+self._bp+(0.5*(1.0-self.outlier_proportion_small)*(self.width-2*self._bp)), self.y+self._bp+(self._a*self._bpd.min+self._b), self.x+self.width-self._bp-(0.5*(1.0-self.outlier_proportion_small)*(self.width-2*self._bp)), self.y+self._bp+(self._a*self._bpd.min+self._b)
         # The marker indicating some plotted value independent of the boxplot
         Color:
             rgba: self._markercolor
@@ -49,8 +56,8 @@ class BoxPlot(Widget):
     _bpd = ObjectProperty(BoxPlotData(list(np.arange(0, 1.0, 0.1))))
     _a = NumericProperty(0)
     _b = NumericProperty(1)
-    _axis_min = NumericProperty(0)
-    _axis_max = NumericProperty(1)
+    _axis_range = ListProperty([0,1])
+    _auto_axis = BooleanProperty(True)
 
     _boxcolor = ListProperty([0, 1, 0, 1])
     _bp = NumericProperty(15)
@@ -60,14 +67,9 @@ class BoxPlot(Widget):
     _markervalue = NumericProperty(0)
     _markerwidth = NumericProperty(2)
 
-    def set_axes(self, axis_min: float, axis_max: float):
-        self._axis_min = axis_min
-        self._axis_max = axis_max
-        self._computeAB()
-
     def _computeAB(self):
-        self._a = float((self.height-2.*(self._bp+self._op))/(self._bpd.max-self._bpd.min))
-        self._b = float(-self._a*self._bpd.min)
+        self._a = float((self.height-2.*(self._bp+self._op))/(self._axis_range[1]-self._axis_range[0]))
+        self._b = float(-self._a*self._axis_range[0])
 
     @property
     def outlier_proportion_large(self):
@@ -135,8 +137,19 @@ class BoxPlot(Widget):
             bpd = data
         else:
             bpd = BoxPlotData(data)
-        print (bpd)
         self._bpd = bpd
+        if self._auto_axis:
+            self._axis_range = (bpd.min, bpd.max)
+        self._computeAB()
+
+    @property
+    def axis_range(self):
+        return self._axis_range
+
+    @axis_range.setter
+    def axis_range(self, minmax: Tuple[float, float]):
+        self._axis_range = minmax
+        self._auto_axis = False
         self._computeAB()
 
 
@@ -170,6 +183,26 @@ BoxLayout:
             text: "Random Gamma"
         BoxPlot:
             data: np.random.gamma(2, 2, 500)
+    BoxLayout
+        orientation: 'vertical'
+        Label:
+            size_hint: 1, .1
+            halign: 'center'
+            text: "Random Normal\\n(fixed range)"
+        BoxPlot:
+            boxcolor: 1,0,0,1
+            data: np.random.normal(3, 2.5, 500)
+            axis_range: -10, 10
+    BoxLayout
+        orientation: 'vertical'
+        Label:
+            size_hint: 1, .1
+            halign: 'center'
+            text: "Random Normal\\n(fixed range)"
+        BoxPlot:
+            boxcolor: 1,0,0,1
+            data: np.random.normal(-1, 3, 500)
+            axis_range: -10, 10
         
 ''')
         return container
