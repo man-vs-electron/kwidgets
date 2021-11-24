@@ -26,6 +26,7 @@ Builder.load_string("""
         text: root.key
     Label:
         text_size: self.width-root.text_padding*2, self.height-root.text_padding*2
+        size_hint_x: 1.0-root.key_size_hint_x
         halign: root.value_halign
         valign: root.valign
         text: root._value
