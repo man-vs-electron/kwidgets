@@ -33,6 +33,24 @@ Builder.load_string("""
 """)
 
 class LabeledValue(BoxLayout):
+    """ A combination of a key and a value to display.
+
+    Relevant attributes are:
+
+    * key - the key
+    * value - the value
+    * text_padding - number of pixels of padding around
+      the label.
+    * box_padding - Number of pixels of padding around the
+      border
+    * line_width - The width of the border
+    * box_color - Color of the box
+    * valign - How to vertically align the text
+    * key_halign - How to horizontally align the key
+    * value_halign - How to horizontally align the value
+    * format - a format string for the value
+
+    """
     text_padding = NumericProperty(10)
     box_padding = NumericProperty(5)
     box_color = ListProperty([1,1,1,0])
@@ -51,10 +69,18 @@ class LabeledValue(BoxLayout):
 
     @property
     def value(self):
+        """ The value to display.
+
+        :return:
+        """
         return self._original_value
 
     @value.setter
     def value(self, value):
+        """ The value to display
+
+        :param value:
+        """
         self._original_value=value
         self._value = self.format % value
 
