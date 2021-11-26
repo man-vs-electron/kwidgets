@@ -18,6 +18,11 @@ Builder.load_string("""
     padding: 50
     canvas:
         Color: 
+            rgb: 0, 0, 0, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        Color: 
             rgba: 1, 1, 1, 1
         Line:
             width: 2.0
