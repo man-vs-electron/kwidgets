@@ -19,6 +19,7 @@ class SimpleTable(LabeledValue):
 
     * data - a dictionary mapping from the keys to the values to display in the table
     * keys - which keys from the table to display.  If not specified, use all the keys
+    * displaykeys - optional list of strings to display as the keys.
     * itemformat - a format to apply to each value.
 
     Note that other properties from LabeledValue (box_width, box_color, value_halign,
@@ -27,6 +28,7 @@ class SimpleTable(LabeledValue):
     """
     _data = DictProperty({})
     _keys = ListProperty(None)
+    _displaykeys = ListProperty(None)
     _itemformat = StringProperty(None)
 
     def _update(self):
@@ -35,11 +37,20 @@ class SimpleTable(LabeledValue):
         """
         if len(self._data) != 0:
             thekeys = self._keys if self._keys is not None else self._data.keys()
-            self.key = "\n".join(thekeys)
-            if self._itemformat is None:
-                self.value = "\n".join([str(self._data[k] if k in self._data else "??") for k in thekeys])
-            else:
-                self._value = "\n".join([(self._itemformat % self._data[k]) if k in self._data else "??" for k in thekeys])
+            self.key = "\n".join(thekeys if self._displaykeys is None else self._displaykeys)
+            value_parts = []
+            for k in thekeys:
+                if k not in self._data:
+                    value_parts.append("??")
+                else:
+                    if self._data[k] is None:
+                        value_parts.append("None")
+                    else:
+                        if self._itemformat is None:
+                            value_parts.append(str(self._data[k]))
+                        else:
+                            value_parts.append(self._itemformat % self._data[k])
+            self.value = "\n".join(value_parts)
         else:
             self.key = ""
             self.value = ""
@@ -73,9 +84,23 @@ class SimpleTable(LabeledValue):
     def keys(self, keys: List[str]):
         """ A dictionary of keys and values to display.
 
+        Note that it is the responsibility of the developer to make sure the number and ordering of the display keys
+        match the actual keys.
+
         :param keys:
         """
         self._keys = keys
+        self._update()
+
+    @property
+    def displaykeys(self):
+        return self._displaykeys
+
+    @displaykeys.setter
+    def displaykeys(self, displaykeys: List[str]):
+        """ An optional list of text to show instead of the regular keys
+        """
+        self._displaykeys = displaykeys
         self._update()
 
     @property
@@ -110,6 +135,8 @@ BoxLayout:
         key_size_hint_x: 0.5
     SimpleTable:
         data: {'car':'red', 'truck':'black'}
+        keys: 'car', 'truck'
+        displaykeys: "Car", "Truck"
 ''')
 
 if __name__ == "__main__":
