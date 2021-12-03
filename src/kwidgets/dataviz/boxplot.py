@@ -40,18 +40,19 @@ Builder.load_string("""
         Line:
             # the horizontal line indicating the 3rd quartile plut 1.5 IQR
             points: self.x+self._bp,  self.y+self._bp+self._op+(self._a*self._bpd.max+self._b), self.x+self.width-self._bp,  self.y+self._bp+self._op+(self._a*self._bpd.max+self._b) 
+        Color:
+            rgba: self._markercolor
+        Ellipse:
+            pos: self.x+self.width/2-8,  (self.y+self._bp+2.*self._op+(self._a*self._bpd.max+self._b) if self._markervalue>self._bpd.max else ((self.y+self._bp+(self._a*self._bpd.min+self._b)) if self.markervalue<self._bpd.min else (self.y+self._bp+self._op+(self._a*self._markervalue+self._b))))-8
+            size: 16, 16
+        Color:
+            rgba: self._boxcolor
         Line:
             # plot large outliers as extra line
             points: self.x+self._bp+(0.5*(1.0-self.outlier_proportion_large)*(self.width-2*self._bp)), self.y+self._bp+2.*self._op+(self._a*self._bpd.max+self._b), self.x+self.width-self._bp-(0.5*(1.0-self.outlier_proportion_large)*(self.width-2*self._bp)), self.y+self._bp+2.*self._op+(self._a*self._bpd.max+self._b)
         Line:
             # plot small outliers as extra line
             points: self.x+self._bp+(0.5*(1.0-self.outlier_proportion_small)*(self.width-2*self._bp)), self.y+self._bp+(self._a*self._bpd.min+self._b), self.x+self.width-self._bp-(0.5*(1.0-self.outlier_proportion_small)*(self.width-2*self._bp)), self.y+self._bp+(self._a*self._bpd.min+self._b)
-        # The marker indicating some plotted value independent of the boxplot
-        Color:
-            rgba: self._markercolor
-        Line:
-            width: self._markerwidth
-            points: self.x+self._bp,  self.y+self._bp+self._op+(self._a*self._markervalue+self._b), self.x+self.width-self._bp, self.y+self._bp+self._op+(self._a*self._markervalue+self._b)
 """)
 
 
@@ -258,6 +259,8 @@ BoxLayout:
             text: "Random Gamma"
         BoxPlot:
             data: np.random.gamma(2, 2, 500)
+            markervalue: 15
+            markercolor: 1, 0, 0, 1
     BoxLayout
         orientation: 'vertical'
         Label:
@@ -268,6 +271,8 @@ BoxLayout:
             boxcolor: 1,0,0,1
             data: np.random.normal(3, 2.5, 500)
             axis_range: -10, 10
+            markervalue: -100
+            markercolor: 0, 1, 0, 1
     BoxLayout
         orientation: 'vertical'
         Label:
