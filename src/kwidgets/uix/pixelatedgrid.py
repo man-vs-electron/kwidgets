@@ -1,114 +1,59 @@
 from numpy import random
-from kivy import app
 from kivy.uix.widget import Widget
 from kivy.lang.builder import Builder
-from kivy.properties import ListProperty, NumericProperty
+from kivy.properties import ListProperty, NumericProperty, ObjectProperty
 from kivy.app import App
 from kivy.clock import Clock
-from kivy.graphics import Color, Rectangle
+from kivy.graphics import Color, Rectangle, Line
 
-Builder.load_string("""
-<Cell>:
-    canvas.before:
-        Color:
-            rgb: self.background
-        Rectangle:
-            size: self.size
-            pos: self.pos
-    
-    
-<SquareCell>:
-    canvas:
-        Color:
-            rgb: self.foreground
-        Rectangle:
-            size: self.size[0]-self.border_width*2, self.size[1]-self.border_width*2
-            pos: self.pos[0]+self.border_width, self.pos[1]+self.border_width   
-            
-<CircleCell>:
-    canvas:
-        Color:
-            rgb: self.foreground
-        Ellipse:
-            size: min(self.size[0], self.size[1])-self.border_width*2, min(self.size[0], self.size[1])-self.border_width*2
-            pos: self.pos[0]+self.border_width, self.pos[1]+self.border_width                    
-""")
-
-
-class Cell(Widget):
-    background = ListProperty([0, 0, 0])
-    border_width = NumericProperty(1)
-
-    def set_foreground(self, rgb):
-        self.foreground = rgb
-
-class SquareCell(Cell):
-    foreground = ListProperty([0, 0, 1])
-
-class CircleCell(Cell):
-    foreground = ListProperty([0, 0, 1])
 
 class PixelatedGrid(Widget):
-    cols: int = 100
-    rows: int = 100
-    padding: int = 1
+    background = ListProperty([0, 0, 0, 1])
+    grid_color = ListProperty([47/255, 79/255, 79/255, 1])
+    activated_color = ListProperty([0, 1, 0, 1])
+    cell_length = NumericProperty(10)
+    activated_cells = ObjectProperty(set())
 
     def __init__(self, **kwargs):
         super(PixelatedGrid, self).__init__(**kwargs)
         self.bind(pos=self.update_canvas)
         self.bind(size=self.update_canvas)
+        self.bind(activated_cells=self.update_canvas)
         self.update_canvas()
 
     def update_canvas(self, *args):
-        cell_width = int(self.width/self.cols)
-        cell_height = int(self.height/self.rows)
         self.canvas.clear()
         with self.canvas.before:
-            Color(0, 0, 0, 1)
+            Color(*self.background)
             Rectangle(pos = [0,0], size=[self.width, self.height])
         with self.canvas:
-            Color(0, 1, 0, 1)
-            for x in range(0, self.rows):
-                for y in range(0, self.cols):
-                    Rectangle(pos = [cell_width*x+self.padding, cell_height*y + self.padding],
-                              size=[cell_width-(self.padding*2), cell_height-(self.padding*2)])
+            Color(*self.grid_color)
+            for x in range(0, self.width, self.cell_length):
+                Line(points=[x, 0, x, self.height], width=1)
+            for y in range(self.height, 0, -self.cell_length):
+                Line(points=[0, y, self.width, y], width=1)
+
+            Color(*self.activated_color)
+            for x, y in self.activated_cells:
+                Rectangle(pos=[x*self.cell_length, self.height-y*self.cell_length], size=[self.cell_length, self.cell_length])
+
+    def visible_width(self):
+        return self.width//self.cell_length
+
+    def visible_height(self):
+        return self.height//self.cell_length
 
 
 class PixelatedGridApp(App):
-    def build(self):
-        return PixelatedGrid()
 
-
-class CellTestApp(App):
-    square_cells = None
-    circle_cells = None
-
-    def random_green(self, *kwargs):
-        self.square_cells[random.randint(0, 50*25)].set_foreground([0, 1, 0])
+    def activate_random(self, *args):
+        num_cells=100
+        self.container.activated_cells = set([(random.randint(0, self.container.visible_width()), random.randint(0, self.container.visible_height())) for _ in range(0,num_cells)])
 
     def build(self):
-        container = Builder.load_string('''
-BoxLayout:
-    orientation: 'horizontal'
-    GridLayout:
-        id: squares
-        cols: 50
-    GridLayout:
-        id: circles
-        cols: 50    
-''')
-        self.square_cells = [SquareCell() for _ in range(0,50*25)]
-        self.square_cells[1].foreground = [0, 1, 0]
-        [container.ids.squares.add_widget(x) for x in self.square_cells]
-
-        self.circle_cells = [CircleCell() for _ in range(0,50*25)]
-        self.circle_cells[1].foreground = [0, 1, 0]
-        [container.ids.circles.add_widget(x) for x in self.circle_cells]
-        self.container = container
-
-        Clock.schedule_interval(self.random_green, 1)
-
-        return container
+        self.container = PixelatedGrid()
+        Clock.schedule_interval(self.activate_random, .5)
+        return self.container
 
 
 if __name__ == "__main__":
