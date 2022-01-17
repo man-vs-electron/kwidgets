@@ -1,7 +1,7 @@
 """ A widget for displaying a rotating set of quotations.
 
-Includes an application such that if this module is run directly with a path to a
-text file containing one quotation per line, it will rotate through those quotations.
+Includes an application such that if this module is run directly with a path to a text file containing one quotation
+per line, it will rotate through those quotations.
 """
 from typing import List, Union
 import sys
@@ -38,15 +38,19 @@ Builder.load_string("""
 
 class QuotationDisplay(BoxLayout):
     """ Widget that displays a rotating set of quotations.
+
+    Key Properties:
+    * update_sec: The number of seconds before changing the quotation
+    * quotations: assigned as either a list of strings, one per quotation, or a single string that is a path to
+                  a file with quotations, one per line.
     """
     text = StringProperty(defaultvalue="huh?")
-    _update_sec = 10
+    _update_sec: int = 10
     _quotations: List[str] = ["No quotations specified"]
 
-    def __init__(self, quotations = Union[str, List[str]], **kwargs):
+    def __init__(self, **kwargs):
         """ Create a new QuotationDisplay widget
 
-        :param quotations: Either a list of quotations or a path to a file containing one quotation per line
         :param kwargs:
         """
         super(QuotationDisplay, self).__init__(**kwargs)
@@ -59,7 +63,7 @@ class QuotationDisplay(BoxLayout):
         self.text = random.choice(self._quotations)
 
     @property
-    def update_sec(self):
+    def update_sec(self) -> int:
         """ Number of seconds between quotation transitions.
 
         :return:
@@ -70,17 +74,17 @@ class QuotationDisplay(BoxLayout):
     def update_sec(self, value: int):
         """ Set the number of seconds between quotation transitions.  Resets and restarts the schedule for this object.
 
-        :param value:
+        :param value: The number of seconds between quotation transitions
         """
         self._update_sec = value
         self.event.cancel()
         self.event = Clock.schedule_interval(self.update, self.update_sec)
 
     @property
-    def quotations(self):
+    def quotations(self) -> List[str]:
         """ A list of strings, each of which represents a quotation.
 
-        :return:
+        :return: A list of quotations
         """
         return self._quotations
 
@@ -89,7 +93,7 @@ class QuotationDisplay(BoxLayout):
         """ Set the quotations used by this object.
 
         :param quotations: Either a list of strings, each of which represent a quotation or a path to a file
-        containing quotations.  Also sets a new quotation on the display.
+        containing one quotation per line.  Also sets a new quotation on the display.
         """
         if isinstance(quotations, str):
             with open(quotations, 'r', encoding="latin-1") as f:
@@ -98,7 +102,13 @@ class QuotationDisplay(BoxLayout):
             self._quotations = quotations
         self.text = random.choice(self._quotations)
 
-
+_sample_quotations = [
+    "If you seek Truth, you will not seek to gain a victory by every possible means; and when you have found Truth, you need not fear being defeated. -Epictetus",
+    "If anyone tells you that a certain person speaks ill of you, do not make excuses about what is said of you but answer, 'He was ignorant of my other faults, else he would not have mentioned these alone.' -Epictetus",
+    "Every moment think steadily as a Roman and a man to do what thou hast in hand with perfect and simple dignity, and feeling of affection, and freedom, and justice; and to give thyself relief from all other thoughts. -Marcus Aurelius",
+    "For nowhere, either with more quiet or more freedom from trouble, does a man retire than into his own soul. -Marcus Aurelius",
+    "My conduct might be blameable, but I leave it, without attempting further to excuse it; my present purpose being to relate facts, and not to make apologies for them. -Ben Franklin"
+]
 class QuotationDisplayApp(App):
     """ Displays a Quotation display with an exit button on the right.
 
@@ -113,8 +123,7 @@ BoxLayout:
     QuotationDisplay:
         id: quotation_widget
         size_hint: .9, 1
-        update_sec: 60*30
-        quotations: "I have a bad feeling about this.", "Luke, I am your father."
+        update_sec: 10
     BoxLayout:
         size_hint: .1, 1
         Button:
@@ -126,6 +135,8 @@ BoxLayout:
             Window.fullscreen=True
         if len(sys.argv) > 1:
             container.q.quotations = sys.argv[1]
+        else:
+            container.q.quotations = _sample_quotations
         return container
 
 

@@ -1,10 +1,9 @@
 """ Radio Buttons
 
-This provides a set of radio buttons for Kivy with an easy way to
-specify the options, a default value, and a callback for when the
-options change.
+This provides a set of radio buttons for Kivy with an easy way to specify the options, a default value, and a callback
+for when the options change.
 """
-from typing import List, Callable, Any
+from typing import List
 from kivy.app import App
 from kivy.lang.builder import Builder
 from kivy.uix.boxlayout import BoxLayout
@@ -13,8 +12,9 @@ from kivy.properties import ListProperty, StringProperty
 
 
 class RadioButtons(BoxLayout):
-    """ The RadioButtons Class.  The key options for this object are:
+    """ The RadioButtons Class.
 
+    Key Properties:
     * options: a list of strings, one for each button
     * selected_value: a string property with the currently selected value
     * selected_color: an rgba list with the color for the selected button
@@ -26,7 +26,7 @@ class RadioButtons(BoxLayout):
     _selected_color = ListProperty([1, 0, 0, 1])
     selected_value = StringProperty("")
 
-    def _update_button_colors(self, source, value):
+    def _update_button_colors(self, source, value: str):
         """ Update the button colors to match the selection.
 
         :param source: unused
@@ -36,7 +36,7 @@ class RadioButtons(BoxLayout):
             b.background_normal = '' if b.text==value else self._oldcolor[0]
             b.background_color = self._selected_color if b.text==value else self._oldcolor[1]
 
-    def button_pressed(self, x):
+    def button_pressed(self, x: Button):
         """ Set the selected value according to the button pressed.
 
         :param x: The text from the button pressed
@@ -44,24 +44,24 @@ class RadioButtons(BoxLayout):
         self.selected_value = x.text
 
     @property
-    def selected_color(self):
+    def selected_color(self) -> List[float]:
         """ The color of the selected button.
 
-        :return:
+        :return: The RGBA color of the selected button
         """
         return self._selected_color
 
     @selected_color.setter
-    def selected_color(self, color = List[float]):
+    def selected_color(self, color: List[float]):
         """ The rgba value for the button when it is pressed
 
-        :param color:
+        :param color: The RGBA color of the selected button
         """
         self._selected_color = color
         self._update_button_colors(None, self.selected_value)
 
     @property
-    def options(self):
+    def options(self) -> List[str]:
         """ A list of strings, one for each radio button
 
         :return:
@@ -72,10 +72,8 @@ class RadioButtons(BoxLayout):
     def options(self, options: List[str]):
         """ A list of strings, one for each radio button.
 
-        Note that this can only be called once per object.  Otherwise
-        an exception will be thrown.  This method creates the buttons,
-        populates the widget, and binds relevant methods.
-        :rtype: object
+        Note that this can only be called once per object.  Otherwise an exception will be thrown.  This method creates
+        the buttons, populates the widget, and binds relevant methods.
         """
         if len(self._options) > 0:
             raise RuntimeError("Options can only be set once")

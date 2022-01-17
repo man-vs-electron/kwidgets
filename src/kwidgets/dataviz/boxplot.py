@@ -1,4 +1,6 @@
-""" A boxplot object for Kivy
+""" A boxplot visualization in Kivy
+
+Running this module will display sample box plots.
 """
 
 from typing import Union, Iterable, Tuple
@@ -57,8 +59,23 @@ Builder.load_string("""
 
 
 class BoxPlot(Widget):
-    """ A Kivy boxplot object.
+    """ A Kivy boxplot widget.
 
+    It takes pre-computed BoxPlotData objects or raw iterables over numbers an draws a box plot.  Outliers are drawn
+    as variable length lines above or below the plots.  It can also plot another value on top of the box as a circle.
+
+    Key Properties:
+    * data: assigned as either an instance of BoxPlotData or a list of numbers from which a BoxPlotData object will be
+            computed.
+    * boxpadding: number of pixels to leave on any side of the box
+    * outlierpadding: number of pixels between the top/bottom of the box and the line for outliers
+    * boxcolor: RGBA color for the box itself
+    * markercolor: RGBA color for the marker that is drawn over the box
+    * markervalue: the extra value to plot as a marker.  Expressed in terms of the original data
+    * axis_range: A list of two number that indicate the minimum and maximum range of the overall widget.  If not set,
+                  the effective range is set by the data being plotted.  If set, the box is drawn within that range.
+                  This is useful when plotting multiple boxplots next to each other and wanting them to share a Y
+                  range.
     """
     _bpd = ObjectProperty(BoxPlotData(list(np.arange(0, 1.0, 0.1))))
     _a = NumericProperty(0)
@@ -75,7 +92,7 @@ class BoxPlot(Widget):
     _markerwidth = NumericProperty(2)
 
     def _computeAB(self):
-        """ Computer values needed to scale data values to pixels.
+        """ Compute values needed to scale data values to pixels.
 
         Given the range of the plot and the height of the object in pixels,
         computer the parameters for linear computation (ax+b) to convert a
@@ -85,7 +102,7 @@ class BoxPlot(Widget):
         self._b = float(-self._a*self._axis_range[0])
 
     @property
-    def outlier_proportion_large(self):
+    def outlier_proportion_large(self) -> float:
         """ For computing the width of the top outlier line
 
         :return: min(10, num large outliers)/10
@@ -93,7 +110,7 @@ class BoxPlot(Widget):
         return min(10, len([x for x in self._bpd.outliers if x>self._bpd.max]))/10.
 
     @property
-    def outlier_proportion_small(self):
+    def outlier_proportion_small(self) -> float:
         """ For computing the width of the small outlier line
 
         :return: min(10, num small outliers)/10
@@ -101,23 +118,23 @@ class BoxPlot(Widget):
         return min(10, len([x for x in self._bpd.outliers if x<self._bpd.min]))/10.
 
     @property
-    def boxpadding(self):
-        """ The number of pixles to use as a border around the box.
+    def boxpadding(self) -> int:
+        """ The number of pixels to use as a border around the box.
 
         :return: number of pixels
         """
         return self._bp
 
     @boxpadding.setter
-    def boxpadding(self, value):
-        """ The number of pixles to use as a border around the box.
+    def boxpadding(self, value: int):
+        """ The number of pixels to use as a border around the box.
 
         :param value: number of pixels
         """
         self._bp = value
 
     @property
-    def outlierpadding(self):
+    def outlierpadding(self) -> int:
         """ Number of pixels between the top of the box plot and the line for outliers.
 
         :return: number of pixels
@@ -125,7 +142,7 @@ class BoxPlot(Widget):
         return self._op
 
     @outlierpadding.setter
-    def outlierpadding(self, value):
+    def outlierpadding(self, value: int):
         """ Number of pixels between the top of the box plot and the line for outliers.
 
         :param value: number of pixels
@@ -133,7 +150,7 @@ class BoxPlot(Widget):
         self._op = value
 
     @property
-    def boxcolor(self):
+    def boxcolor(self) -> Tuple[float, float, float, float]:
         """ The color of the box
 
         :return: tuple in the form of red, green, blue, alpha
@@ -141,7 +158,7 @@ class BoxPlot(Widget):
         return self._boxcolor
 
     @boxcolor.setter
-    def boxcolor(self, value):
+    def boxcolor(self, value: Tuple[float, float, float, float]):
         """ The color of the box
 
         :param value: tuple in the form of red, green, blue, alpha
@@ -149,7 +166,7 @@ class BoxPlot(Widget):
         self._boxcolor = value
 
     @property
-    def markercolor(self):
+    def markercolor(self) -> Tuple[float, float, float, float]:
         """ The color of the marker for the extra plotted value.
 
         :return: tuple in the form of red, green, blue, alpha
@@ -157,7 +174,7 @@ class BoxPlot(Widget):
         return self._markercolor
 
     @markercolor.setter
-    def markercolor(self, value):
+    def markercolor(self, value: Tuple[float, float, float, float]):
         """ The color of the marker for the extra plotted value
 
         :param value: tuple in the form of red, green, blue, alpha
@@ -165,7 +182,7 @@ class BoxPlot(Widget):
         self._markercolor = value
 
     @property
-    def markervalue(self):
+    def markervalue(self) -> float:
         """ The extra value to plot
 
         :return: value in the range of the data
@@ -173,7 +190,7 @@ class BoxPlot(Widget):
         return self._markervalue
 
     @markervalue.setter
-    def markervalue(self, value):
+    def markervalue(self, value: float):
         """ The extra value to plot
 
         :param value: value in the range of the data
@@ -181,7 +198,7 @@ class BoxPlot(Widget):
         self._markervalue = value
 
     @property
-    def data(self):
+    def data(self) -> BoxPlotData:
         """ The math.BoxPlotData object being plotted.
 
         :return:
@@ -205,7 +222,7 @@ class BoxPlot(Widget):
         self._computeAB()
 
     @property
-    def axis_range(self):
+    def axis_range(self) -> Tuple[float, float]:
         """ The range of the plot.
 
         In the even that multiple boxplot are displayed next to each other (or for some other reason), it might be
@@ -286,6 +303,7 @@ BoxLayout:
         
 ''')
         return container
+
 
 if __name__ == "__main__":
     BoxPlotApp().run()

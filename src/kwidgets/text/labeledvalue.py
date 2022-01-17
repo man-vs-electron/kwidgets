@@ -1,10 +1,9 @@
 """ Labeled Value
 
-This provides a key/value display with a text label
-and a value that can be formatted using a provided
-formatting string.
+This provides a key/value display with a text label and a value that can be formatted using a provided formatting
+string.
 """
-
+from typing import Any
 from kivy.app import App
 from kivy.lang.builder import Builder
 from kivy.uix.boxlayout import BoxLayout
@@ -32,17 +31,15 @@ Builder.load_string("""
         text: root._value
 """)
 
+
 class LabeledValue(BoxLayout):
     """ A combination of a key and a value to display.
 
-    Relevant attributes are:
-
+    Relevant properties:
     * key - the key
     * value - the value
-    * text_padding - number of pixels of padding around
-      the label.
-    * box_padding - Number of pixels of padding around the
-      border
+    * text_padding - number of pixels of padding around the label.
+    * box_padding - Number of pixels of padding around the border
     * line_width - The width of the border
     * box_color - Color of the box
     * valign - How to vertically align the text
@@ -68,7 +65,7 @@ class LabeledValue(BoxLayout):
 
 
     @property
-    def value(self):
+    def value(self) -> Any:
         """ The value to display.
 
         :return:
@@ -76,10 +73,10 @@ class LabeledValue(BoxLayout):
         return self._original_value
 
     @value.setter
-    def value(self, value):
+    def value(self, value: Any):
         """ The value to display
 
-        :param value:
+        :param value: The value to be displayed.
         """
         self._original_value=value
         self._value = self.format % value
@@ -110,6 +107,7 @@ BoxLayout:
         text_padding: 30
         box_color: 1,0,0,.8
         ''')
+
 
 if __name__ == "__main__":
     LabeledValueApp().run()

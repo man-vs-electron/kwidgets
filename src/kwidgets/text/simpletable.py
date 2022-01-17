@@ -4,19 +4,19 @@ This class takes a dictionary
 and displays the keys and values within a single LabeledValue object.
 """
 
-from typing import Dict, List
+from typing import Dict, List, Any
 from kivy.app import App
 from kivy.lang.builder import Builder
 from kivy.properties import DictProperty, StringProperty, ListProperty
-from kwidgets.uix.labeledvalue import LabeledValue
+from kwidgets.text.labeledvalue import LabeledValue
 
 
 class SimpleTable(LabeledValue):
     """ A simple table that uses a single LabeledValue object.
 
-    Puts all keys and all labels together.  Relevant properties
-    (in addition to LabeledValue properties) are:
+    Puts all keys and all labels together.
 
+    Key Properties (in addition to the labeledvalue key properties):
     * data - a dictionary mapping from the keys to the values to display in the table
     * keys - which keys from the table to display.  If not specified, use all the keys
     * displaykeys - optional list of strings to display as the keys.
@@ -25,10 +25,13 @@ class SimpleTable(LabeledValue):
     Note that other properties from LabeledValue (box_width, box_color, value_halign,
     key_halign) are relevant for this class as well.
 
+    There are a variety of ways in which this table can fail.  For example, if the values
+    are long enough that they line wrap in the space provided, the keys and values won't
+    line up.
     """
     _data = DictProperty({})
     _keys = ListProperty(None)
-    _displaykeys = ListProperty(None)
+    _displaykeys = ListProperty(None)  # TODO: This should probably be a dictionary
     _itemformat = StringProperty(None)
 
     def _update(self):
@@ -56,7 +59,7 @@ class SimpleTable(LabeledValue):
             self.value = ""
 
     @property
-    def data(self):
+    def data(self) -> Dict[str, Any]:
         """ A dictionary of keys and values to display
 
         :return:
@@ -64,16 +67,16 @@ class SimpleTable(LabeledValue):
         return self._data
 
     @data.setter
-    def data(self, d: Dict):
+    def data(self, d: Dict[str, Any]):
         """ A dictionary of keys and values to display
 
         :param d:
         """
         self._data = d
         self._update()
-        
+
     @property
-    def keys(self):
+    def keys(self) -> List[str]:
         """ An optional list of keys from the main dictionary to display
 
         :return:
@@ -93,7 +96,15 @@ class SimpleTable(LabeledValue):
         self._update()
 
     @property
-    def displaykeys(self):
+    def displaykeys(self) -> List[str]:
+        """ An optional list of text to show instead of the regular keys.
+
+        If not used with the keys field, the assumption is that the iteration
+        over the display keys is the same as the iteration over the data dictionary keys.
+        Should be improved in a future release.
+
+        :return: A list of strings to show.
+        """
         return self._displaykeys
 
     @displaykeys.setter
@@ -104,7 +115,7 @@ class SimpleTable(LabeledValue):
         self._update()
 
     @property
-    def itemformat(self):
+    def itemformat(self) -> str:
         """ A format string that will be applied to each value.
 
         :return:
@@ -138,6 +149,7 @@ BoxLayout:
         keys: 'car', 'truck'
         displaykeys: "Car", "Truck"
 ''')
+
 
 if __name__ == "__main__":
     SimpleTableApp().run()

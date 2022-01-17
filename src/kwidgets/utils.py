@@ -1,8 +1,7 @@
 """ Various generic utility functions.
 
-Adapted from: https://www.geeksforgeeks.org/python-merge-two-lists-alternatively/
 """
-from typing import List, Iterable, Union
+from typing import List, Iterable, Union, Tuple
 
 
 def intersperse(iteratorables: List[Iterable]):
@@ -10,8 +9,10 @@ def intersperse(iteratorables: List[Iterable]):
 
     For example: [[1,2,3], [4,5,6]] should return [1,4,2,5,3,6].
 
+    Adapted from: https://www.geeksforgeeks.org/python-merge-two-lists-alternatively/
+
     :param iteratorables:
-    :return:
+    :return: a single list with the values in the provided iterables interspersed
     """
     iters = [iter(i) for i in iteratorables]
     while True:
@@ -22,7 +23,7 @@ def intersperse(iteratorables: List[Iterable]):
                 return
 
 
-def to_xy(values: List[Union[int, float]]):
+def to_xy(values: List[Union[int, float]]) -> Tuple[List[Union[int, float]], List[Union[int, float]]]:
     """  Split a list of points into an x,y sequence
 
     :param values:  A list of values in the form [x1,y1,x2,y2,...]
