@@ -148,6 +148,8 @@ BoxLayout:
         data: {'car':'red', 'truck':'black'}
         keys: 'car', 'truck'
         displaykeys: "Car", "Truck"
+        key_color: 1, 0, 0, 1
+        value_color: 0, 1, 0, 1
 ''')
 
 

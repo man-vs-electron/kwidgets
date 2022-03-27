@@ -22,12 +22,14 @@ Builder.load_string("""
         size_hint_x: root.key_size_hint_x  
         halign: root.key_halign
         valign: root.valign
+        color: root.key_color
         text: root.key
     Label:
         text_size: self.width-root.text_padding*2, self.height-root.text_padding*2
         size_hint_x: 1.0-root.key_size_hint_x
         halign: root.value_halign
         valign: root.valign
+        color: root.value_color
         text: root._value
 """)
 
@@ -42,6 +44,8 @@ class LabeledValue(BoxLayout):
     * box_padding - Number of pixels of padding around the border
     * line_width - The width of the border
     * box_color - Color of the box
+    * key_color - Color of the label text
+    * value_color - Color of the value text
     * valign - How to vertically align the text
     * key_halign - How to horizontally align the key
     * value_halign - How to horizontally align the value
@@ -51,6 +55,8 @@ class LabeledValue(BoxLayout):
     text_padding = NumericProperty(10)
     box_padding = NumericProperty(5)
     box_color = ListProperty([1,1,1,0])
+    key_color = ListProperty([1,1,1,1])
+    value_color = ListProperty([1,1,1,1])
     line_width = NumericProperty(1)
     valign = StringProperty("center")
 
@@ -93,6 +99,8 @@ BoxLayout:
         value: 'first value'
     LabeledValue:
         key: 'A Number'
+        key_color: 1, 0, 0, 1
+        value_color: 0, 1, 0, 1
         format: '%10.4f'
         value: 1.2345678910
         box_color: 0,1,0,1
